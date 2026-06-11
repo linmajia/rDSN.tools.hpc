@@ -132,7 +132,7 @@ namespace dsn
                 _listen_fd = create_tcp_socket(&addr);
                 if (_listen_fd == -1)
                 {
-                    derror("cannot create listen socket");
+                    dassert(false, "cannot create listen socket");
                     return ERR_NETWORK_START_FAILED;
                 }
 
@@ -146,8 +146,6 @@ namespace dsn
                 if (listen(_listen_fd, SOMAXCONN) != 0)
                 {
                     dwarn("listen failed, err = %s", strerror(errno));
-                    ::close(_listen_fd);
-                    _listen_fd = -1;
                     return ERR_NETWORK_START_FAILED;
                 }
 
@@ -174,12 +172,7 @@ namespace dsn
             addr.sin_port = 0;
 
             auto sock = create_tcp_socket(&addr);
-            if (sock == -1)
-            {
-                derror("create client tcp socket failed");
-                return rpc_session_ptr();
-            }
-
+            dassert(sock != -1, "create client tcp socket failed!");
             message_parser_ptr parser(new_message_parser(_client_hdr_format));
             auto client = new hpc_rpc_session(sock, parser, *this, server_addr, true);
             rpc_session_ptr c(client);

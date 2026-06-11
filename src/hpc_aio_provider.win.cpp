@@ -273,17 +273,8 @@ error_code hpc_aio_provider::aio_internal(aio_task* aio_tsk, bool async, /*out*/
         r = ::WriteFile((HANDLE)aio->file, aio->buffer, aio->buffer_size, NULL, &aio->olp);
         break;
     default:
-        derror("unknown aio type %u", static_cast<int>(aio->type));
-        if (async)
-        {
-            complete_io(aio_tsk, ERR_INVALID_PARAMETERS, 0);
-        }
-        else
-        {
-            delete aio->evt;
-            aio->evt = nullptr;
-        }
-        return ERR_INVALID_PARAMETERS;
+        dassert (false, "unknown aio type %u", static_cast<int>(aio->type));
+        break;
     }
 
     if (!r)

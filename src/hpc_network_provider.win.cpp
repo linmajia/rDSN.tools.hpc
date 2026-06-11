@@ -119,7 +119,7 @@ namespace dsn
             socket_t s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
             if (s == INVALID_SOCKET)
             {
-                derror("create Socket Failed, err = %d", ::GetLastError());
+                dassert(false, "create Socket Failed, err = %d", ::GetLastError());
                 return;
             }
 
@@ -224,7 +224,7 @@ namespace dsn
                 _listen_fd = create_tcp_socket(&addr);
                 if (_listen_fd == INVALID_SOCKET)
                 {
-                    derror("cannot create listen socket, err = %d", ::GetLastError());
+                    dassert(false, "cannot create listen socket, err = %d", ::GetLastError());
                     return ERR_NETWORK_START_FAILED;
                 }
 
@@ -240,8 +240,6 @@ namespace dsn
                 if (listen(_listen_fd, SOMAXCONN) != 0)
                 {
                     dwarn("listen failed, err = %d", ::GetLastError());
-                    closesocket(_listen_fd);
-                    _listen_fd = INVALID_SOCKET;
                     return ERR_NETWORK_START_FAILED;
                 }
                 
@@ -283,7 +281,7 @@ namespace dsn
             socket_t s = create_tcp_socket(nullptr);
             if (s == INVALID_SOCKET)
             {
-                derror("cannot create socket for accept, err = %d", ::GetLastError());
+                dassert(false, "cannot create socket for accept, err = %d", ::GetLastError());
                 return;
             }
 
