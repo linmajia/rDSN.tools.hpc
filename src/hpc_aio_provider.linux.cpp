@@ -198,6 +198,11 @@ error_code hpc_aio_provider::aio_internal(aio_task* aio_tsk, bool async, /*out*/
         break;
     default:
         derror("unknown aio type %u", static_cast<int>(aio->type));
+        if (async)
+        {
+            complete_io(aio_tsk, ERR_INVALID_PARAMETERS, 0);
+        }
+        return ERR_INVALID_PARAMETERS;
     }
 
     if (!async)
