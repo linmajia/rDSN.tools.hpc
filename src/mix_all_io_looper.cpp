@@ -230,13 +230,14 @@ namespace dsn
             // put into locked queue when it is shared or from remote threads
             if (is_shared() || task::get_current_worker() != this->owner_worker())
             {
+                bool was_empty;
                 {
                     utils::auto_lock< ::dsn::utils::ex_lock_nr_spin> l(_lock);
+                    was_empty = _remote_tasks.is_empty();
                     _remote_tasks.add(task);
                 }
 
-                int old = _remote_count.fetch_add(1, std::memory_order_release);
-                if (old == 0)
+                if (was_empty)
                 {
                     notify_local_execution();
                 }

@@ -212,8 +212,10 @@ dsn_handle_t hpc_aio_provider::open(const char* file_name, int oflag, int pmode)
 
 error_code hpc_aio_provider::close(dsn_handle_t fh)
 {
-    if (::CloseHandle((HANDLE)(fh)))
+    if (fh == DSN_INVALID_FILE_HANDLE || ::CloseHandle((HANDLE)(fh)))
+    {
         return ERR_OK;
+    }
     else
     {
         derror("close file failed, err = 0x%x", ::GetLastError());
