@@ -197,7 +197,8 @@ error_code hpc_aio_provider::aio_internal(aio_task* aio_tsk, bool async, /*out*/
         io_prep_pwrite(&aio->cb, static_cast<int>((ssize_t)aio->file), aio->buffer, aio->buffer_size, aio->file_offset);
         break;
     default:
-        derror("unknown aio type %u", static_cast<int>(aio->type));
+        dassert(false, "unknown aio type %u", static_cast<int>(aio->type));
+        break;
     }
 
     if (!async)

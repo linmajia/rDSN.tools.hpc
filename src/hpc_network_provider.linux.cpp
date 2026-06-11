@@ -133,6 +133,7 @@ namespace dsn
                 if (_listen_fd == -1)
                 {
                     dassert(false, "cannot create listen socket");
+                    return ERR_NETWORK_START_FAILED;
                 }
 
                 int forcereuse = 1;

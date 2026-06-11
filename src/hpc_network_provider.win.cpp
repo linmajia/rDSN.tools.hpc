@@ -120,6 +120,7 @@ namespace dsn
             if (s == INVALID_SOCKET)
             {
                 dassert(false, "create Socket Failed, err = %d", ::GetLastError());
+                return;
             }
 
             GUID GuidAcceptEx = WSAID_ACCEPTEX;
@@ -214,10 +215,17 @@ namespace dsn
                 addr.sin_addr.s_addr = INADDR_ANY;
                 addr.sin_port = htons(port);
 
+                if (s_lpfnAcceptEx == NULL)
+                {
+                    derror("AcceptEx is not available");
+                    return ERR_NETWORK_START_FAILED;
+                }
+
                 _listen_fd = create_tcp_socket(&addr);
                 if (_listen_fd == INVALID_SOCKET)
                 {
-                    dassert(false, "");
+                    dassert(false, "cannot create listen socket, err = %d", ::GetLastError());
+                    return ERR_NETWORK_START_FAILED;
                 }
 
                 int forcereuse = 1;
@@ -243,12 +251,24 @@ namespace dsn
 
         rpc_session_ptr hpc_network_provider::create_client_session(::dsn::rpc_address server_addr)
         {
+            if (s_lpfnConnectEx == NULL)
+            {
+                derror("ConnectEx is not available");
+                return rpc_session_ptr();
+            }
+
             struct sockaddr_in addr;
             addr.sin_family = AF_INET;
             addr.sin_addr.s_addr = INADDR_ANY;
             addr.sin_port = 0;
 
             auto sock = create_tcp_socket(&addr);
+            if (sock == INVALID_SOCKET)
+            {
+                derror("create client tcp socket failed, err = %d", ::GetLastError());
+                return rpc_session_ptr();
+            }
+
             message_parser_ptr parser(new_message_parser(_client_hdr_format));
             auto client = new hpc_rpc_session(sock, parser, *this, server_addr, true);
             rpc_session_ptr c(client);
@@ -259,7 +279,11 @@ namespace dsn
         void hpc_network_provider::do_accept()
         {
             socket_t s = create_tcp_socket(nullptr);
-            dassert(s != INVALID_SOCKET, "cannot create socket for accept");
+            if (s == INVALID_SOCKET)
+            {
+                dassert(false, "cannot create socket for accept, err = %d", ::GetLastError());
+                return;
+            }
 
             _accept_sock = s;            
             _accept_event.callback = [this](int err, uint32_t size, uintptr_t lpolp)
