@@ -120,6 +120,7 @@ namespace dsn
             {
                 utils::auto_lock< ::dsn::utils::ex_lock_nr_spin> l(_lock);
                 t = _remote_tasks.pop_all();
+                _remote_count.store(0, std::memory_order_release);
             }
             
             while (t)
@@ -230,12 +231,13 @@ namespace dsn
             // put into locked queue when it is shared or from remote threads
             if (is_shared() || task::get_current_worker() != this->owner_worker())
             {
+                int old;
                 {
                     utils::auto_lock< ::dsn::utils::ex_lock_nr_spin> l(_lock);
                     _remote_tasks.add(task);
+                    old = _remote_count.fetch_add(1, std::memory_order_release);
                 }
 
-                int old = _remote_count.fetch_add(1, std::memory_order_release);
                 if (old == 0)
                 {
                     notify_local_execution();

@@ -219,7 +219,7 @@ namespace dsn
                     continue;
 
                 tail_log_hdr *hdr = log->last_hdr, *tmp = log->last_hdr;
-                while (tmp != nullptr && tmp != hdr)
+                do
                 {
                     if (!tmp->is_valid())
                         break;
@@ -230,7 +230,7 @@ namespace dsn
                     // try previous log
                     tmp = tmp->prev;
 
-                };
+                } while (tmp != nullptr && tmp != hdr);
             }
 
             olog.close();
