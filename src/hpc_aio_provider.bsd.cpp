@@ -139,12 +139,18 @@ hpc_aio_provider::~hpc_aio_provider()
 dsn_handle_t hpc_aio_provider::open(const char* file_name, int oflag, int pmode)
 {
     // No need to bind handle since EVFILT_AIO is registered when aio_* is called.
-    return  (dsn_handle_t)(uintptr_t)::open(file_name, oflag, pmode);
+    int fd = ::open(file_name, oflag, pmode);
+    if (fd < 0)
+    {
+        derror("open file %s failed, err = %s", file_name, strerror(errno));
+        return DSN_INVALID_FILE_HANDLE;
+    }
+    return  (dsn_handle_t)(uintptr_t)fd;
 }
 
 error_code hpc_aio_provider::close(dsn_handle_t fh)
 {
-    if (::close((int)(uintptr_t)(fh)) == 0)
+    if (fh == DSN_INVALID_FILE_HANDLE || ::close((int)(uintptr_t)(fh)) == 0)
     {
         return ERR_OK;
     }

@@ -195,7 +195,7 @@ namespace dsn
 
                     const char* name = node ? ::dsn::tools::get_service_node_name(node) : "glb";
                     char buffer[128];
-                    sprintf(buffer, "%s.io-loop.%d", name, i);
+                    snprintf_p(buffer, sizeof(buffer), "%s.io-loop.%d", name, i);
                     task_worker::set_name(buffer);
                     
                     this->loop_worker(); 

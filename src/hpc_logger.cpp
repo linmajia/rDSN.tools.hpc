@@ -91,6 +91,8 @@
 # include <dsn/cpp/utils.h>
 # include <dsn/tool-api/command.h>
 # include <cstdlib>
+# include <cstdio>
+# include <cstdarg>
 # include <sstream>
 # include <fstream>
 # include <iostream>
@@ -114,32 +116,75 @@ namespace dsn
         //store log ptr for each thread
         typedef ::dsn::utils::safe_singleton_store<int, hpc_log_tls_info*> hpc_log_manager;
 
+        namespace
+        {
+            char* allocate_log_buffer(int bytes)
+            {
+                char* buffer = (char*)malloc(bytes);
+                if (buffer == nullptr)
+                {
+                    std::fprintf(stderr, "hpc_logger: failed to allocate %d bytes for log buffer\n", bytes);
+                }
+                return buffer;
+            }
+
+            void reset_log_info(hpc_log_tls_info* log)
+            {
+                log->magic = 0;
+                log->buffer = nullptr;
+                log->next_write_ptr = nullptr;
+            }
+
+            int append_log(char*& ptr, size_t& capacity, const char* fmt, ...)
+            {
+                if (capacity == 0)
+                    return 0;
+
+                va_list args;
+                va_start(args, fmt);
+                int written = std::vsnprintf(ptr, capacity, fmt, args);
+                va_end(args);
+                if (written < 0)
+                    return written;
+
+                size_t consumed = static_cast<size_t>(written);
+                if (consumed >= capacity)
+                    consumed = capacity - 1;
+
+                ptr += consumed;
+                capacity -= consumed;
+                return static_cast<int>(consumed);
+            }
+        }
+
         //daemon thread
         void hpc_logger::log_thread()
         {
             std::vector<buffer_info> saved_list;
 
-            while (!_stop_thread)
+            while (!_stop_thread.load(std::memory_order_acquire))
             {
                 _write_list_lock.lock();
-                _write_list_cond.wait(_write_list_lock, [=]{ return  _stop_thread || _write_list.size() > 0; });
+                _write_list_cond.wait(_write_list_lock, [this] {
+                    return _stop_thread.load(std::memory_order_acquire) || _write_list.size() > 0;
+                });
                 saved_list = std::move(_write_list);
                 _write_list.clear();
-                _is_writing = true;
+                _is_writing.store(true, std::memory_order_release);
                 _write_list_lock.unlock();
                 
                 write_buffer_list(saved_list);
-                _is_writing = false;
+                _is_writing.store(false, std::memory_order_release);
             }
 
             _write_list_lock.lock();
             saved_list = _write_list;
             _write_list.clear();
-            _is_writing = true;
+            _is_writing.store(true, std::memory_order_release);
             _write_list_lock.unlock();
 
             write_buffer_list(saved_list);
-            _is_writing = false;
+            _is_writing.store(false, std::memory_order_release);
         }
 
         hpc_logger::hpc_logger(const char* log_dir, logging_provider* inner)
@@ -225,12 +270,13 @@ namespace dsn
         {
             flush();
 
-            if (!_stop_thread)
+            if (!_stop_thread.exchange(true, std::memory_order_acq_rel))
             {
-                _stop_thread = true;
                 _write_list_cond.notify_one();
                 _log_thread.join();
             }
+
+            free_thread_buffers();
 
             _current_log->close();
             delete _current_log;
@@ -248,11 +294,20 @@ namespace dsn
                     continue;
 
                 _write_list_lock.lock();
-                if (log->next_write_ptr != log->buffer)
+                if (log->buffer != nullptr && log->next_write_ptr != log->buffer)
                 {
+                    char* next_buffer = allocate_log_buffer(_per_thread_buffer_bytes);
                     buffer_push(log->buffer, static_cast<int>(log->next_write_ptr - log->buffer));
-                    log->buffer = (char*)malloc(_per_thread_buffer_bytes);
-                    log->next_write_ptr = log->buffer;
+                    if (next_buffer == nullptr)
+                    {
+                        hpc_log_manager::instance().remove(tid);
+                        reset_log_info(log);
+                    }
+                    else
+                    {
+                        log->buffer = next_buffer;
+                        log->next_write_ptr = log->buffer;
+                    }
                 }
                 _write_list_lock.unlock();
             }
@@ -263,7 +318,7 @@ namespace dsn
             while (wait)
             {
                 _write_list_lock.lock();
-                if (_write_list.size() == 0 && !_is_writing)
+                if (_write_list.size() == 0 && !_is_writing.load(std::memory_order_acquire))
                     wait = false;
                 _write_list_lock.unlock();
                 if (wait)
@@ -282,7 +337,10 @@ namespace dsn
         {
             if (s_hpc_log_tls_info.magic != 0xdeadbeef)
             {
-                s_hpc_log_tls_info.buffer = (char*)malloc(_per_thread_buffer_bytes);
+                s_hpc_log_tls_info.buffer = allocate_log_buffer(_per_thread_buffer_bytes);
+                if (s_hpc_log_tls_info.buffer == nullptr)
+                    return;
+
                 s_hpc_log_tls_info.next_write_ptr = s_hpc_log_tls_info.buffer;
 
                 hpc_log_manager::instance().put(::dsn::utils::get_current_tid(), &s_hpc_log_tls_info);
@@ -292,13 +350,24 @@ namespace dsn
             // get enough write space >= 1K
             if (s_hpc_log_tls_info.next_write_ptr + 1024 > s_hpc_log_tls_info.buffer + _per_thread_buffer_bytes)
             {
+                char* next_buffer = allocate_log_buffer(_per_thread_buffer_bytes);
                 _write_list_lock.lock();
                 buffer_push(s_hpc_log_tls_info.buffer, static_cast<int>(s_hpc_log_tls_info.next_write_ptr - s_hpc_log_tls_info.buffer));
-                s_hpc_log_tls_info.buffer = (char*)malloc(_per_thread_buffer_bytes);
-                s_hpc_log_tls_info.next_write_ptr = s_hpc_log_tls_info.buffer;
+                if (next_buffer == nullptr)
+                {
+                    hpc_log_manager::instance().remove(::dsn::utils::get_current_tid());
+                    reset_log_info(&s_hpc_log_tls_info);
+                }
+                else
+                {
+                    s_hpc_log_tls_info.buffer = next_buffer;
+                    s_hpc_log_tls_info.next_write_ptr = s_hpc_log_tls_info.buffer;
+                }
                 _write_list_lock.unlock();
 
                 _write_list_cond.notify_one();
+                if (next_buffer == nullptr)
+                    return;
             }
 
             char* ptr = s_hpc_log_tls_info.next_write_ptr;
@@ -313,16 +382,16 @@ namespace dsn
             char str[24];
             ::dsn::utils::time_ms_to_string(ts / 1000000, str);
             static const char s_level_char[] = "IDWEF";
-            auto wn = snprintf_p(ptr, capacity, "%c%s (%" PRIu64 " %04x) ", s_level_char[log_level], str, ts, tid);
-            ptr += wn;
-            capacity -= wn;
+            auto wn = append_log(ptr, capacity, "%c%s (%" PRIu64 " %04x) ", s_level_char[log_level], str, ts, tid);
+            if (wn < 0)
+                return;
 
             auto t = task::get_current_task_id();
             if (t)
             {
                 if (nullptr != task::get_current_worker2())
                 {
-                    wn = snprintf_p(ptr, capacity, "%6s.%7s%d.%016" PRIx64 ": ",
+                    wn = append_log(ptr, capacity, "%6s.%7s%d.%016" PRIx64 ": ",
                         task::get_current_node_name(),
                         task::get_current_worker2()->pool_spec().name.c_str(),
                         task::get_current_worker2()->index(),
@@ -331,7 +400,7 @@ namespace dsn
                 }
                 else
                 {
-                    wn = snprintf_p(ptr, capacity, "%6s.%7s.%05d.%016" PRIx64 ": ",
+                    wn = append_log(ptr, capacity, "%6s.%7s.%05d.%016" PRIx64 ": ",
                         task::get_current_node_name(),
                         "io-thrd",
                         tid,
@@ -341,17 +410,19 @@ namespace dsn
             }
             else
             {
-                wn = snprintf_p(ptr, capacity, "%6s.%7s.%05d: ",
+                wn = append_log(ptr, capacity, "%6s.%7s.%05d: ",
                     task::get_current_node_name(),
                     "io-thrd",
                     tid
                     );
             }
-
-            ptr += wn;
-            capacity -= wn;
+            if (wn < 0)
+                return;
 
             // print body
+            if (capacity == 0)
+                return;
+
             wn = std::vsnprintf(ptr, capacity - 1, fmt, args);
             if (wn < 0)
             {
@@ -395,14 +466,32 @@ namespace dsn
                     create_log_file();
                 }
 
-                if (new_buffer_info.buffer_size > 0)
+                if (new_buffer_info.buffer != nullptr && new_buffer_info.buffer_size > 0)
                 {
                     _current_log->write(new_buffer_info.buffer, new_buffer_info.buffer_size);
                     _current_log_file_bytes += new_buffer_info.buffer_size;
-                }                
+                }
+                free(new_buffer_info.buffer);
             }
             _current_log->flush();
             llist.clear();
+        }
+
+        void hpc_logger::free_thread_buffers()
+        {
+            std::vector<int> threads;
+            hpc_log_manager::instance().get_all_keys(threads);
+
+            for (auto& tid : threads)
+            {
+                hpc_log_tls_info* log;
+                if (!hpc_log_manager::instance().get(tid, log))
+                    continue;
+
+                free(log->buffer);
+                reset_log_info(log);
+                hpc_log_manager::instance().remove(tid);
+            }
         }
     }
 }

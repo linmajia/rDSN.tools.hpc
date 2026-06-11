@@ -39,6 +39,8 @@
 # include <dsn/cpp/utils.h>
 # include <dsn/tool-api/command.h>
 # include <cstdlib>
+# include <cstdio>
+# include <cstdarg>
 # include <sstream>
 # include <fstream>
 # include <iostream>
@@ -69,6 +71,49 @@ namespace dsn
         typedef ::dsn::utils::safe_singleton_store<int, struct __tail_log_info__*> tail_log_manager;
 
         static __thread struct __tail_log_info__ s_tail_log_info;
+
+        namespace
+        {
+            char* allocate_tail_log_buffer(int bytes)
+            {
+                char* buffer = (char*)malloc(bytes);
+                if (buffer == nullptr)
+                {
+                    std::fprintf(stderr, "hpc_tail_logger: failed to allocate %d bytes for log buffer\n", bytes);
+                }
+                return buffer;
+            }
+
+            void reset_tail_log_info(__tail_log_info__* log)
+            {
+                log->magic = 0;
+                log->buffer = nullptr;
+                log->next_write_ptr = nullptr;
+                log->last_hdr = nullptr;
+            }
+
+            int append_tail_log(char*& ptr, size_t& capacity, const char* fmt, ...)
+            {
+                if (capacity <= sizeof(tail_log_hdr))
+                    return 0;
+
+                size_t writable = capacity - sizeof(tail_log_hdr);
+                va_list args;
+                va_start(args, fmt);
+                int written = std::vsnprintf(ptr, writable + 1, fmt, args);
+                va_end(args);
+                if (written < 0)
+                    return written;
+
+                size_t consumed = static_cast<size_t>(written);
+                if (consumed > writable)
+                    consumed = writable;
+
+                ptr += consumed;
+                capacity -= consumed;
+                return static_cast<int>(consumed);
+            }
+        }
         
         hpc_tail_logger::hpc_tail_logger(const char* log_dir, logging_provider* inner)
             : logging_provider(log_dir, inner)
@@ -133,6 +178,19 @@ namespace dsn
 
         hpc_tail_logger::~hpc_tail_logger(void)
         {
+            std::vector<int> threads;
+            tail_log_manager::instance().get_all_keys(threads);
+
+            for (auto& tid : threads)
+            {
+                __tail_log_info__* log;
+                if (!tail_log_manager::instance().get(tid, log))
+                    continue;
+
+                free(log->buffer);
+                reset_tail_log_info(log);
+                tail_log_manager::instance().remove(tid);
+            }
         }
 
         void hpc_tail_logger::flush()
@@ -155,6 +213,9 @@ namespace dsn
             {
                 __tail_log_info__* log;
                 if (!tail_log_manager::instance().get(tid, log))
+                    continue;
+
+                if (log->last_hdr == nullptr)
                     continue;
 
                 tail_log_hdr *hdr = log->last_hdr, *tmp = log->last_hdr;
@@ -197,6 +258,9 @@ namespace dsn
 
                 // filter by tid
                 if (target_threads.size() > 0 && target_threads.find(tid) == target_threads.end())
+                    continue;
+
+                if (log->last_hdr == nullptr)
                     continue;
 
                 tail_log_hdr *hdr = log->last_hdr, *tmp = log->last_hdr;
@@ -251,7 +315,10 @@ namespace dsn
             // init log buffer if necessary
             if (s_tail_log_info.magic != 0xdeadbeef)
             {
-                s_tail_log_info.buffer = (char*)malloc(_per_thread_buffer_bytes);
+                s_tail_log_info.buffer = allocate_tail_log_buffer(_per_thread_buffer_bytes);
+                if (s_tail_log_info.buffer == nullptr)
+                    return;
+
                 s_tail_log_info.next_write_ptr = s_tail_log_info.buffer;
                 s_tail_log_info.last_hdr = nullptr;
                 memset(s_tail_log_info.buffer, '\0', _per_thread_buffer_bytes);
@@ -261,7 +328,7 @@ namespace dsn
             }
 
             // get enough write space >= 1K
-            if (s_tail_log_info.next_write_ptr + 1024 > s_tail_log_info.buffer + _per_thread_buffer_bytes)
+            if (s_tail_log_info.next_write_ptr + 1024 + sizeof(tail_log_hdr) > s_tail_log_info.buffer + _per_thread_buffer_bytes)
             {
                 s_tail_log_info.next_write_ptr = s_tail_log_info.buffer;
             }
@@ -276,16 +343,16 @@ namespace dsn
                 ts = dsn_now_ns();
             char str[24];
             ::dsn::utils::time_ms_to_string(ts / 1000000, str);            
-            auto wn = sprintf(ptr, "%s (%" PRIu64 " %04x) ", str, ts, tid);
-            ptr += wn;
-            capacity -= wn;
+            auto wn = append_tail_log(ptr, capacity, "%s (%" PRIu64 " %04x) ", str, ts, tid);
+            if (wn < 0)
+                return;
 
             auto t = task::get_current_task_id();
             if (t)
             {
                 if (nullptr != task::get_current_worker2())
                 {
-                    wn = sprintf(ptr, "%6s.%7s%d.%016" PRIx64 ": ",
+                    wn = append_tail_log(ptr, capacity, "%6s.%7s%d.%016" PRIx64 ": ",
                         task::get_current_node_name(),
                         task::get_current_worker2()->pool_spec().name.c_str(),
                         task::get_current_worker2()->index(),
@@ -294,7 +361,7 @@ namespace dsn
                 }
                 else
                 {
-                    wn = sprintf(ptr, "%6s.%7s.%05d.%016" PRIx64 ": ",
+                    wn = append_tail_log(ptr, capacity, "%6s.%7s.%05d.%016" PRIx64 ": ",
                         task::get_current_node_name(),
                         "io-thrd",
                         tid,
@@ -304,30 +371,33 @@ namespace dsn
             }
             else
             {
-                wn = sprintf(ptr, "%6s.%7s.%05d: ",
+                wn = append_tail_log(ptr, capacity, "%6s.%7s.%05d: ",
                     task::get_current_node_name(),
                     "io-thrd",
                     tid
                     );
             }
-
-            ptr += wn;
-            capacity -= wn;
+            if (wn < 0)
+                return;
 
             // print body
-            wn = std::vsnprintf(ptr, capacity, fmt, args);
+            size_t writable = capacity > sizeof(tail_log_hdr) ? capacity - sizeof(tail_log_hdr) : 0;
+            wn = writable > 0 ? std::vsnprintf(ptr, writable + 1, fmt, args) : 0;
             if (wn < 0)
             {
-                wn = snprintf_p(ptr, capacity, "-- cannot printf due to that log entry has error ---");
+                wn = append_tail_log(ptr, capacity, "-- cannot printf due to that log entry has error ---");
+                if (wn < 0)
+                    return;
             }
-            else if (static_cast<unsigned>(wn) > capacity)
+            else
             {
-                // log truncated
-                wn = capacity;
-            }
+                size_t consumed = static_cast<size_t>(wn);
+                if (consumed > writable)
+                    consumed = writable;
 
-            ptr += wn;
-            capacity -= wn;
+                ptr += consumed;
+                capacity -= consumed;
+            }
             
             // set binary entry header on tail
             tail_log_hdr* hdr = (tail_log_hdr*)ptr;
