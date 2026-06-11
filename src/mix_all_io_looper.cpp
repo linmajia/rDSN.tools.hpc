@@ -246,7 +246,13 @@ namespace dsn
             // put into local queue
             else
             {
+                bool was_empty = _local_tasks.is_empty();
                 _local_tasks.add(task);
+
+                if (was_empty)
+                {
+                    notify_local_execution();
+                }
             }
         }
 
