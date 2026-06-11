@@ -40,6 +40,7 @@
 # include <thread>
 # include <mutex>
 # include <condition_variable>
+# include <atomic>
 
 namespace dsn {
     namespace tools {
@@ -74,9 +75,10 @@ namespace dsn {
             //print logs in log list
             void write_buffer_list(std::vector<buffer_info>& llist);
             void create_log_file();
+            void free_thread_buffers();
 
         private:            
-            bool        _stop_thread;
+            std::atomic<bool> _stop_thread;
             std::thread _log_thread;
             std::string _log_dir;
 
@@ -84,7 +86,7 @@ namespace dsn {
             std::condition_variable_any   _write_list_cond;
             ::dsn::utils::ex_lock_nr_spin _write_list_lock;            
             std::vector<buffer_info>      _write_list;
-            volatile bool                 _is_writing;
+            std::atomic<bool>             _is_writing;
 
             // log file and line count
             int _start_index;
