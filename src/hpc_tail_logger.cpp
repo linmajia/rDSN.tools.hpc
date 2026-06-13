@@ -300,7 +300,7 @@ namespace dsn
             ss << "------------------------------------------" << std::endl;
             ss << "In total (" << log_count << ") log entries are found between [" << strb << ", "<< stre << "] " << std::endl;
 
-            return std::move(ss.str());
+            return ss.str();
         }
 
         void hpc_tail_logger::dsn_logv(const char *file,
