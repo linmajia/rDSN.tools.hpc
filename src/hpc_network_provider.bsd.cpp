@@ -69,7 +69,7 @@ namespace dsn
             if (flags == -1 || fcntl(s, F_SETFL, flags | O_NONBLOCK) == -1)
             {
                 dwarn("fcntl O_NONBLOCK failed, err = %s", strerror(errno));
-                closesocket(s);
+                close(s);
                 return -1;
             }
 # endif
