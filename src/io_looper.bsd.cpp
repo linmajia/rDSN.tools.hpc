@@ -29,7 +29,7 @@
  *     io looper implementation for BSD.
  *
  * Revision history:
- *     2015-09-01, HX Lin(linmajia@live.com), first version
+ *     2015-09-01, HX Lin, first version
  *     xxxx-xx-xx, author, fix bug about xxx
  */
 
