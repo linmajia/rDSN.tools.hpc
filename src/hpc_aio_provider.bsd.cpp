@@ -29,7 +29,7 @@
  *     AIO using kqueue on BSD
  *
  * Revision history:
- *     2015-09-07, HX Lin(linmajia@live.com), first version
+ *     2015-09-07, HX Lin, first version
  *     xxxx-xx-xx, author, fix bug about xxx
  */
 
