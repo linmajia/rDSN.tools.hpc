@@ -59,8 +59,10 @@ namespace dsn
 
         private:
             uint64_t _ns_start;
+# if defined(_WIN32)
             uint64_t _tick_start;
             double   _tick_frequency_per_ns;
+# endif
         };
     }
 }

@@ -39,6 +39,7 @@
 # include "hpc_network_provider.h"
 # include "mix_all_io_looper.h"
 # include <netinet/tcp.h>
+# include <fcntl.h>
 
 # ifdef __TITLE__
 # undef __TITLE__
@@ -53,11 +54,25 @@ namespace dsn
         static socket_t create_tcp_socket(sockaddr_in* addr)
         {
             socket_t s = -1;
-            if ((s = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, IPPROTO_TCP)) == -1)
+            int type = SOCK_STREAM;
+# if defined(SOCK_NONBLOCK)
+            type |= SOCK_NONBLOCK;
+# endif
+            if ((s = socket(AF_INET, type, IPPROTO_TCP)) == -1)
             {
                 dwarn("socket failed, err = %s", strerror(errno));
                 return -1;
             }
+
+# if !defined(SOCK_NONBLOCK)
+            int flags = fcntl(s, F_GETFL, 0);
+            if (flags == -1 || fcntl(s, F_SETFL, flags | O_NONBLOCK) == -1)
+            {
+                dwarn("fcntl O_NONBLOCK failed, err = %s", strerror(errno));
+                closesocket(s);
+                return -1;
+            }
+# endif
 
             int reuse = 1;
             if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (char*)&reuse, sizeof(int)) == -1)
@@ -305,7 +320,7 @@ namespace dsn
         {
             int flags;
 
-            static_assert (sizeof(dsn_message_parser::send_buf) == sizeof(struct iovec), 
+            static_assert(sizeof(message_parser::send_buf) == sizeof(struct iovec),
                 "make sure they are compatible");
 
             dbg_dassert(sig != 0, "cannot send empty msg");
