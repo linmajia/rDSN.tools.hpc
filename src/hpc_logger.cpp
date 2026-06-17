@@ -259,7 +259,7 @@ namespace dsn
                 auto dp = utils::filesystem::path_combine(_log_dir, str2.str());
                 if (::remove(dp.c_str()) != 0)
                 {
-                    printf("Failed to remove garbage log file %s\n", dp.c_str());
+                    std::fprintf(stderr, "Failed to remove garbage log file %s\n", dp.c_str());
                     _start_index--;
                     break;
                 }
