@@ -43,7 +43,7 @@
 # include <libaio.h>
 # endif
 
-# if defined(__APPLE__) || defined(__FreeBSD__)
+# if defined(__FreeBSD__)
 # include <aio.h>
 # endif
 
@@ -75,7 +75,7 @@ namespace dsn {
 
             io_context_t _ctx;
             int          _event_fd;
-# elif defined(__APPLE__) || defined(__FreeBSD__)
+# elif defined(__FreeBSD__)
             void complete_aio(struct aiocb* io, int bytes, int err);
 # endif
         };

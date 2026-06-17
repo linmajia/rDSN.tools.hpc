@@ -38,7 +38,11 @@
 # include "hpc_task_queue.h"
 # include "hpc_tail_logger.h"
 # include "hpc_logger.h"
+# if defined(__APPLE__)
+# include "native_aio_provider.posix.h"
+# else
 # include "hpc_aio_provider.h"
+# endif
 # include "hpc_network_provider.h"
 # include "hpc_env_provider.h"
 # include "mix_all_io_looper.h"
@@ -55,7 +59,11 @@ namespace dsn {
             register_component_provider<hpc_concurrent_task_queue>("dsn::tools::hpc_concurrent_task_queue");
             register_component_provider<hpc_env_provider>("dsn::tools::hpc_env_provider");
             
+# if defined(__APPLE__)
+            register_component_provider<native_posix_aio_provider>("dsn::tools::hpc_aio_provider");
+# else
             register_component_provider<hpc_aio_provider>("dsn::tools::hpc_aio_provider");
+# endif
             register_component_provider<hpc_network_provider>("dsn::tools::hpc_network_provider");
             register_component_provider<io_looper_task_queue>("dsn::tools::io_looper_task_queue");
             register_component_provider<io_looper_task_worker>("dsn::tools::io_looper_task_worker");
