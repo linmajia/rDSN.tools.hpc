@@ -380,7 +380,7 @@ namespace dsn
             if (::dsn::tools::is_engine_ready())
                 ts = dsn_now_ns();
             char str[24];
-            ::dsn::utils::time_ms_to_string(ts / 1000000, str);
+            ::dsn::utils::time_ms_to_string(ts / 1000000, str, sizeof(str));
             static const char s_level_char[] = "IDWEF";
             auto wn = append_log(ptr, capacity, "%c%s (%" PRIu64 " %04x) ", s_level_char[log_level], str, ts, tid);
             if (wn < 0)

@@ -294,8 +294,8 @@ namespace dsn
             }
 
             char strb[24], stre[24];
-            ::dsn::utils::time_ms_to_string(start / 1000000, strb);
-            ::dsn::utils::time_ms_to_string(end / 1000000, stre);
+            ::dsn::utils::time_ms_to_string(start / 1000000, strb, sizeof(strb));
+            ::dsn::utils::time_ms_to_string(end / 1000000, stre, sizeof(stre));
 
             ss << "------------------------------------------" << std::endl;
             ss << "In total (" << log_count << ") log entries are found between [" << strb << ", "<< stre << "] " << std::endl;
@@ -342,7 +342,7 @@ namespace dsn
             if (::dsn::tools::is_engine_ready())
                 ts = dsn_now_ns();
             char str[24];
-            ::dsn::utils::time_ms_to_string(ts / 1000000, str);            
+            ::dsn::utils::time_ms_to_string(ts / 1000000, str, sizeof(str));
             auto wn = append_tail_log(ptr, capacity, "%s (%" PRIu64 " %04x) ", str, ts, tid);
             if (wn < 0)
                 return;
