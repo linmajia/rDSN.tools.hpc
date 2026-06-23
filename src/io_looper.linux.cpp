@@ -110,7 +110,7 @@ namespace dsn
         {
             int fd = (int)(intptr_t)handle;
             
-            if (epoll_ctl(_io_queue, EPOLL_CTL_DEL, fd, NULL) < 0)
+            if (epoll_ctl(_io_queue, EPOLL_CTL_DEL, fd, nullptr) < 0)
             {
                 derror("unbind io handler to epoll_wait failed, err = %s, fd = %d", strerror(errno), fd);
 

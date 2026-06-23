@@ -63,7 +63,7 @@ namespace dsn
         {
             events; // not used on windows
             ctx; // not used on windows
-            if (NULL == ::CreateIoCompletionPort((HANDLE)handle, _io_queue, (ULONG_PTR)cb, 0))
+            if (nullptr == ::CreateIoCompletionPort((HANDLE)handle, _io_queue, (ULONG_PTR)cb, 0))
             {
                 derror("bind io handler to completion port failed, err = %d", ::GetLastError());
                 return ERR_BIND_IOCP_FAILED;
@@ -80,7 +80,7 @@ namespace dsn
 
         void io_looper::notify_local_execution()
         {
-            if (!::PostQueuedCompletionStatus(_io_queue, 0, NON_IO_TASK_NOTIFICATION_KEY, NULL))
+            if (!::PostQueuedCompletionStatus(_io_queue, 0, NON_IO_TASK_NOTIFICATION_KEY, nullptr))
             {
                 derror("PostQueuedCompletionStatus failed, err = %d", ::GetLastError());
             }
@@ -88,8 +88,8 @@ namespace dsn
 
         void io_looper::create_completion_queue()
         {
-            _io_queue = ::CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0);
-            if (_io_queue == NULL || _io_queue == INVALID_HANDLE_VALUE)
+            _io_queue = ::CreateIoCompletionPort(INVALID_HANDLE_VALUE, nullptr, 0, 0);
+            if (_io_queue == nullptr || _io_queue == INVALID_HANDLE_VALUE)
             {
                 derror("CreateIoCompletionPort failed, err = %d", ::GetLastError());
                 _io_queue = 0;
@@ -171,7 +171,7 @@ namespace dsn
                     }
 
                     // only possible for timeout
-                    if (NULL == lolp)
+                    if (nullptr == lolp)
                     {
                         handle_local_queues();
                         continue;

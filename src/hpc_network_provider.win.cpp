@@ -107,13 +107,13 @@ namespace dsn
             return s;
         }
 
-        static LPFN_ACCEPTEX s_lpfnAcceptEx = NULL;
-        static LPFN_CONNECTEX s_lpfnConnectEx = NULL;
-        static LPFN_GETACCEPTEXSOCKADDRS s_lpfnGetAcceptExSockaddrs = NULL;
+        static LPFN_ACCEPTEX s_lpfnAcceptEx = nullptr;
+        static LPFN_CONNECTEX s_lpfnConnectEx = nullptr;
+        static LPFN_GETACCEPTEXSOCKADDRS s_lpfnGetAcceptExSockaddrs = nullptr;
 
         static void load_socket_functions()
         {
-            if (s_lpfnGetAcceptExSockaddrs != NULL)
+            if (s_lpfnGetAcceptExSockaddrs != nullptr)
                 return;
 
             socket_t s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -142,8 +142,8 @@ namespace dsn
                 &s_lpfnAcceptEx,
                 sizeof(s_lpfnAcceptEx),
                 &dwBytes,
-                NULL,
-                NULL);
+                nullptr,
+                nullptr);
             if (rt == SOCKET_ERROR)
             {
                 dwarn("WSAIoctl for AcceptEx failed, err = %d", ::WSAGetLastError());
@@ -159,8 +159,8 @@ namespace dsn
                 &s_lpfnConnectEx,
                 sizeof(s_lpfnConnectEx),
                 &dwBytes,
-                NULL,
-                NULL);
+                nullptr,
+                nullptr);
             if (rt == SOCKET_ERROR)
             {
                 dwarn("WSAIoctl for ConnectEx failed, err = %d", ::WSAGetLastError());
@@ -175,8 +175,8 @@ namespace dsn
                 &s_lpfnGetAcceptExSockaddrs,
                 sizeof(s_lpfnGetAcceptExSockaddrs),
                 &dwBytes,
-                NULL,
-                NULL);
+                nullptr,
+                nullptr);
             if (rt == SOCKET_ERROR)
             {
                 dwarn("WSAIoctl for GetAcceptExSockaddrs failed, err = %d", ::WSAGetLastError());
@@ -215,7 +215,7 @@ namespace dsn
                 addr.sin_addr.s_addr = INADDR_ANY;
                 addr.sin_port = htons(port);
 
-                if (s_lpfnAcceptEx == NULL)
+                if (s_lpfnAcceptEx == nullptr)
                 {
                     derror("AcceptEx is not available");
                     return ERR_NETWORK_START_FAILED;
@@ -251,7 +251,7 @@ namespace dsn
 
         rpc_session_ptr hpc_network_provider::create_client_session(::dsn::rpc_address server_addr)
         {
-            if (s_lpfnConnectEx == NULL)
+            if (s_lpfnConnectEx == nullptr)
             {
                 derror("ConnectEx is not available");
                 return rpc_session_ptr();
@@ -427,7 +427,7 @@ namespace dsn
                 &bytes,
                 &flag,
                 &_read_event.olp,
-                NULL
+                nullptr
                 );
             
             if (SOCKET_ERROR == rt && (WSAGetLastError() != ERROR_IO_PENDING))
@@ -514,7 +514,7 @@ namespace dsn
                 &bytes,
                 0,
                 &_write_event.olp,
-                NULL
+                nullptr
                 );
             
             if (SOCKET_ERROR == rt && (WSAGetLastError() != ERROR_IO_PENDING))
