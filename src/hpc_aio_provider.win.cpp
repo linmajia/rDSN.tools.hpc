@@ -105,7 +105,7 @@ dsn_handle_t hpc_aio_provider::open(const char* file_name, int oflag, int pmode)
     SECURITY_ATTRIBUTES SecurityAttributes;
 
     SecurityAttributes.nLength = sizeof(SecurityAttributes);
-    SecurityAttributes.lpSecurityDescriptor = NULL;
+    SecurityAttributes.lpSecurityDescriptor = nullptr;
 
     if (oflag & _O_NOINHERIT) {
         SecurityAttributes.bInheritHandle = FALSE;
@@ -283,10 +283,10 @@ error_code hpc_aio_provider::aio_internal(aio_task* aio_tsk, bool async, /*out*/
     switch (aio->type)
     {
     case AIO_Read:
-        r = ::ReadFile((HANDLE)aio->file, aio->buffer, aio->buffer_size, NULL, &aio->olp);
+        r = ::ReadFile((HANDLE)aio->file, aio->buffer, aio->buffer_size, nullptr, &aio->olp);
         break;
     case AIO_Write:
-        r = ::WriteFile((HANDLE)aio->file, aio->buffer, aio->buffer_size, NULL, &aio->olp);
+        r = ::WriteFile((HANDLE)aio->file, aio->buffer, aio->buffer_size, nullptr, &aio->olp);
         break;
     default:
         dassert (false, "unknown aio type %u", static_cast<int>(aio->type));
