@@ -52,7 +52,7 @@ namespace dsn
         io_looper::~io_looper(void)
         {
             stop();
-            close(_local_notification_fd);
+            close_fd(_local_notification_fd);
         }
 
         error_code io_looper::bind_io_handle(
@@ -178,7 +178,7 @@ namespace dsn
         {
             if (_io_queue != 0)
             {
-                ::close(_io_queue);
+                close_fd(_io_queue);
                 _io_queue = 0;
             }
         }

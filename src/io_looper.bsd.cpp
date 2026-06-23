@@ -250,7 +250,7 @@ namespace dsn
             if (_io_queue != -1)
             {
         unbind_io_handle((dsn_handle_t)(intptr_t)_local_notification_fd, &_local_notification_callback);
-                ::close(_io_queue);
+                close_fd(_io_queue);
                 _io_queue = -1;
             }
         }

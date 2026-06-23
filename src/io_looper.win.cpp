@@ -82,20 +82,28 @@ namespace dsn
         {
             if (!::PostQueuedCompletionStatus(_io_queue, 0, NON_IO_TASK_NOTIFICATION_KEY, NULL))
             {
-                dassert(false, "PostQueuedCompletionStatus failed, err = %d", ::GetLastError());
+                derror("PostQueuedCompletionStatus failed, err = %d", ::GetLastError());
             }
         }
 
         void io_looper::create_completion_queue()
         {
             _io_queue = ::CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0);
+            if (_io_queue == NULL || _io_queue == INVALID_HANDLE_VALUE)
+            {
+                derror("CreateIoCompletionPort failed, err = %d", ::GetLastError());
+                _io_queue = 0;
+            }
         }
 
         void io_looper::close_completion_queue()
         {
             if (_io_queue != 0)
             {
-                ::CloseHandle(_io_queue);
+                if (::CloseHandle(_io_queue) == FALSE)
+                {
+                    derror("CloseHandle failed, err = %d", ::GetLastError());
+                }
                 _io_queue = 0;
             }
         }
