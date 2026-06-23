@@ -121,7 +121,7 @@ hpc_aio_provider::~hpc_aio_provider()
     auto ret = io_destroy(_ctx);
     dassert(ret == 0, "io_destroy error, err = %s", strerror(-ret));
 
-    ::close(_event_fd);
+    close_fd(_event_fd);
 }
 
 dsn_handle_t hpc_aio_provider::open(const char* file_name, int oflag, int pmode)

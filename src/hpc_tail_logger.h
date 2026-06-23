@@ -59,7 +59,10 @@ namespace dsn {
             virtual void flush();
 
         private:
-            std::string search(const char* keyword, int back_seconds, int back_start_seconds, std::unordered_set<int>& target_threads);
+            std::string search(const char* keyword,
+                               unsigned int back_seconds,
+                               unsigned int back_start_seconds,
+                               std::unordered_set<int>& target_threads);
             void hpc_tail_logs_dumpper();
 
         private:

@@ -39,6 +39,10 @@
 
 # ifndef _WIN32
 
+# include <cerrno>
+# include <cstring>
+# include <unistd.h>
+
 # ifdef __linux__
 # include <sys/epoll.h>
 # endif
@@ -62,6 +66,24 @@ namespace dsn
 {
     namespace tools
     {
+# ifndef _WIN32
+        inline void close_fd(int fd)
+        {
+            if (::close(fd) != 0)
+            {
+                dwarn("close fd %d failed, err = %s", fd, strerror(errno));
+            }
+        }
+
+        inline void close_socket(int s)
+        {
+            if (::close(s) != 0)
+            {
+                dwarn("close socket %d failed, err = %s", s, strerror(errno));
+            }
+        }
+# endif
+
         //
         // this structure is per io handle, and registered when bind_io_handle to completion queue
         // the callback will be executed per io completion or ready

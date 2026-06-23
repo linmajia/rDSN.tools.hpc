@@ -38,7 +38,6 @@
 # include <dsn/utility/singleton_store.h>
 # include <dsn/cpp/utils.h>
 # include <dsn/tool-api/command.h>
-# include <cstdlib>
 # include <cstdio>
 # include <cstdarg>
 # include <sstream>
@@ -141,7 +140,9 @@ namespace dsn
                 [this](const safe_vector<safe_string>& args)
                 {
                     if (args.size() < 2)
+                    {
                         return safe_string("invalid arguments for tail-log command");
+                    }
                     else
                     {
                         std::unordered_set<int> target_threads;
@@ -151,14 +152,30 @@ namespace dsn
                             ::dsn::utils::split_args(args[3].c_str(), tids, ',');
                             for (auto& t : tids)
                             {
-                                target_threads.insert(atoi(t.c_str()));
+                                unsigned int tid = 0;
+                                if (!::dsn::utils::lexical_cast_integer<unsigned int>(t, tid))
+                                {
+                                    return safe_string("invalid thread id");
+                                }
+                                target_threads.insert((int)tid);
                             }
+                        }
+
+                        unsigned int back_seconds = 0;
+                        unsigned int back_start_seconds = 0;
+                        if (!::dsn::utils::lexical_cast_integer<unsigned int>(
+                                std::string(args[1].c_str(), args[1].size()), back_seconds) ||
+                            (args.size() >= 3 &&
+                             !::dsn::utils::lexical_cast_integer<unsigned int>(
+                                 std::string(args[2].c_str(), args[2].size()), back_start_seconds)))
+                        {
+                            return safe_string("invalid back seconds");
                         }
 
                         return safe_string(this->search(
                             args[0].c_str(),
-                            atoi(args[1].c_str()),
-                            args.size() >= 3 ? atoi(args[2].c_str()) : 0,
+                            back_seconds,
+                            back_start_seconds,
                             target_threads
                             ).c_str());
                     }
@@ -237,7 +254,9 @@ namespace dsn
         }
 
         std::string hpc_tail_logger::search(
-            const char* keyword, int back_seconds, int back_start_seconds, 
+            const char* keyword,
+            unsigned int back_seconds,
+            unsigned int back_start_seconds,
             std::unordered_set<int>& target_threads)
         {
             uint64_t nts = dsn_now_ns();
@@ -258,7 +277,9 @@ namespace dsn
 
                 // filter by tid
                 if (target_threads.size() > 0 && target_threads.find(tid) == target_threads.end())
+                {
                     continue;
+                }
 
                 if (log->last_hdr == nullptr)
                     continue;

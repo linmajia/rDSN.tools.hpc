@@ -69,7 +69,7 @@ namespace dsn
             if (flags == -1 || fcntl(s, F_SETFL, flags | O_NONBLOCK) == -1)
             {
                 dwarn("fcntl O_NONBLOCK failed, err = %s", strerror(errno));
-                close(s);
+                close_socket(s);
                 return -1;
             }
 # endif
@@ -109,7 +109,7 @@ namespace dsn
                 if (bind(s, (struct sockaddr*)addr, sizeof(*addr)) != 0)
                 {
                     derror("bind failed, err = %s", strerror(errno));
-                    ::close(s);
+                    close_socket(s);
                     return -1;
                 }
             }
@@ -426,7 +426,7 @@ namespace dsn
         {
             if (-1 != _socket)
             {
-                ::close(_socket);
+                close_socket(_socket);
                 dinfo("(s = %d) close socket %p", _socket, this);
                 _socket = -1;
             }

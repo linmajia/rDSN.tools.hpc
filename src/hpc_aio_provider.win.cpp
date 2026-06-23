@@ -196,7 +196,11 @@ dsn_handle_t hpc_aio_provider::open(const char* file_name, int oflag, int pmode)
         if (err != ERR_OK)
         {
             dassert(false, "cannot associate file handle %s to io completion port, err = 0x%x", file_name, ::GetLastError());
-            return 0;
+            if (::CloseHandle(fileHandle) == FALSE)
+            {
+                derror("close file failed, err = 0x%x", ::GetLastError());
+            }
+            return DSN_INVALID_FILE_HANDLE;
         }
         else
         {
@@ -206,13 +210,18 @@ dsn_handle_t hpc_aio_provider::open(const char* file_name, int oflag, int pmode)
     else
     {
         derror("cannot create file %s, err = 0x%x", file_name, ::GetLastError());
-        return 0;
+        return DSN_INVALID_FILE_HANDLE;
     }
 }
 
 error_code hpc_aio_provider::close(dsn_handle_t fh)
 {
-    if (fh == DSN_INVALID_FILE_HANDLE || ::CloseHandle((HANDLE)(fh)))
+    if (fh == DSN_INVALID_FILE_HANDLE)
+    {
+        return ERR_OK;
+    }
+
+    if (::CloseHandle((HANDLE)(fh)))
     {
         return ERR_OK;
     }
@@ -225,13 +234,18 @@ error_code hpc_aio_provider::close(dsn_handle_t fh)
 
 error_code hpc_aio_provider::flush(dsn_handle_t fh)
 {
-    if (fh == DSN_INVALID_FILE_HANDLE || ::FlushFileBuffers((HANDLE)(fh)))
+    if (fh == DSN_INVALID_FILE_HANDLE)
+    {
+        return ERR_OK;
+    }
+
+    if (::FlushFileBuffers((HANDLE)(fh)))
     {
         return ERR_OK;
     }
     else
     {
-        derror("close file failed, err = 0x%x", ::GetLastError());
+        derror("flush file failed, err = 0x%x", ::GetLastError());
         return ERR_FILE_OPERATION_FAILED;
     }
 }
