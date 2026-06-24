@@ -2,8 +2,8 @@
  * The MIT License (MIT)
  *
  * Copyright (c) 2015 Microsoft Corporation
- * 
- * -=- Robust Distributed System Nucleus (rDSN) -=- 
+ *
+ * -=- Robust Distributed System Nucleus (rDSN) -=-
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -47,7 +47,7 @@ namespace dsn
         };
 
         io_looper* get_io_looper(service_node* node, task_queue* q, ioe_mode mode)
-        {   
+        {
             switch (mode)
             {
             case IOE_PER_NODE:
@@ -89,7 +89,7 @@ namespace dsn
 
         io_looper_task_queue::~io_looper_task_queue()
         {
-        
+
         }
 
         void io_looper_task_queue::start(service_node* node, int worker_count)
@@ -121,7 +121,7 @@ namespace dsn
                 utils::auto_lock< ::dsn::utils::ex_lock_nr_spin> l(_lock);
                 t = _remote_tasks.pop_all();
             }
-            
+
             while (t)
             {
                 next = t->next;
@@ -182,7 +182,7 @@ namespace dsn
                 while (t)
                 {
                     _remote_timer_tasks_count--;
-                    
+
                     next = t->next;
 
                     if (local_exec)
@@ -256,7 +256,7 @@ namespace dsn
             batch_size = 0;
             return nullptr;
         }
-               
+
         io_looper_task_worker::io_looper_task_worker(task_worker_pool* pool, task_queue* q, int index, task_worker* inner_provider)
             : task_worker(pool, q, index, inner_provider)
         {

@@ -2,8 +2,8 @@
  * The MIT License (MIT)
  *
  * Copyright (c) 2015 Microsoft Corporation
- * 
- * -=- Robust Distributed System Nucleus (rDSN) -=- 
+ *
+ * -=- Robust Distributed System Nucleus (rDSN) -=-
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -58,14 +58,14 @@
 *                                          -------------------------
 *                                             buffer (per thread)
 *                                                      |
-*                                                      |   when the buffer is full, 
+*                                                      |   when the buffer is full,
 *                                                      |   push the buffer and buffer size into _write_list,
 *                                                      |   malloc a new buffer for the thread to use
 *                                                      V
 *                  ========================================================================================================== _write_list_lock
 *
-*                                            -------------------------------------------------------------      
-*                                                {buf1, buf1_size} | {buf2, buf2_size} | {buf3, buf3_size} | ...     
+*                                            -------------------------------------------------------------
+*                                                {buf1, buf1_size} | {buf2, buf2_size} | {buf3, buf3_size} | ...
 *                                            -------------------------------------------------------------
 *                                                              _write_list
 *
@@ -73,9 +73,9 @@
 *                                                                   |
 *                                                                   |   when the _write_list is not empty,
 *                                                                   |   daemon thread is notified by _write_list_cond
-*                                                                    V          
+*                                                                    V
 *
-*                                                             Daemon thread 
+*                                                             Daemon thread
 *
 *                                                                   ||
 *                                                                   ===========>     log.x.txt
@@ -102,7 +102,7 @@
 namespace dsn
 {
     namespace tools
-    {        
+    {
         typedef struct __hpc_log_info__
         {
             uint32_t magic;
@@ -172,7 +172,7 @@ namespace dsn
                 _write_list.clear();
                 _is_writing.store(true, std::memory_order_release);
                 _write_list_lock.unlock();
-                
+
                 write_buffer_list(saved_list);
                 _is_writing.store(false, std::memory_order_release);
             }
@@ -374,7 +374,7 @@ namespace dsn
             char* ptr0 = ptr; // remember it
             size_t capacity = static_cast<size_t>(s_hpc_log_tls_info.buffer + _per_thread_buffer_bytes - ptr);
 
-            // print verbose log header    
+            // print verbose log header
             uint64_t ts = 0;
             int tid = ::dsn::utils::get_current_tid();
             if (::dsn::tools::is_engine_ready())
@@ -445,12 +445,12 @@ namespace dsn
             if (log_level >= LOG_LEVEL_WARNING)
             {
                 std::cout.write(ptr0, ptr - ptr0);
-            }    
+            }
         }
 
         void hpc_logger::buffer_push(char* buffer, int size)
         {
-            _write_list.emplace_back(buffer, size); 
+            _write_list.emplace_back(buffer, size);
         }
 
         void hpc_logger::write_buffer_list(std::vector<buffer_info>& llist)

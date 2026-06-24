@@ -2,8 +2,8 @@
  * The MIT License (MIT)
  *
  * Copyright (c) 2015 Microsoft Corporation
- * 
- * -=- Robust Distributed System Nucleus (rDSN) -=- 
+ *
+ * -=- Robust Distributed System Nucleus (rDSN) -=-
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -43,7 +43,7 @@
 namespace dsn
 {
     namespace tools
-    {        
+    {
         io_looper::io_looper()
         {
             _io_queue = 0;
@@ -121,8 +121,8 @@ namespace dsn
                     char buffer[128];
                     snprintf_p(buffer, sizeof(buffer), "%s.io-loop.%d", name, i);
                     task_worker::set_name(buffer);
-                    
-                    this->loop_worker(); 
+
+                    this->loop_worker();
                 });
                 _workers.push_back(thr);
             }

@@ -2,8 +2,8 @@
  * The MIT License (MIT)
  *
  * Copyright (c) 2015 Microsoft Corporation
- * 
- * -=- Robust Distributed System Nucleus (rDSN) -=- 
+ *
+ * -=- Robust Distributed System Nucleus (rDSN) -=-
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -77,14 +77,14 @@ namespace dsn {
             void create_log_file();
             void free_thread_buffers();
 
-        private:            
+        private:
             std::atomic<bool> _stop_thread;
             std::thread _log_thread;
             std::string _log_dir;
 
             // global buffer list
             std::condition_variable_any   _write_list_cond;
-            ::dsn::utils::ex_lock_nr_spin _write_list_lock;            
+            ::dsn::utils::ex_lock_nr_spin _write_list_lock;
             std::vector<buffer_info>      _write_list;
             std::atomic<bool>             _is_writing;
 
@@ -95,7 +95,7 @@ namespace dsn {
             int _current_log_file_bytes;
             int _max_number_of_log_files_on_disk;
 
-            // current write file            
+            // current write file
             std::ofstream *_current_log;
         };
     }

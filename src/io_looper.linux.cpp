@@ -2,8 +2,8 @@
  * The MIT License (MIT)
  *
  * Copyright (c) 2015 Microsoft Corporation
- * 
- * -=- Robust Distributed System Nucleus (rDSN) -=- 
+ *
+ * -=- Robust Distributed System Nucleus (rDSN) -=-
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -73,7 +73,7 @@ namespace dsn
                 flags = fcntl(fd, F_SETFL, flags);
                 dassert(flags != -1, "fcntl failed, err = %s, fd = %d", strerror(errno), fd);
             }
-            
+
             uintptr_t cb0 = (uintptr_t)cb;
             dassert((cb0 & 0x1) == 0, "the least one bit must be zero for the callback address");
 
@@ -85,11 +85,11 @@ namespace dsn
                 auto pr = _io_sessions.insert(io_sessions::value_type(cb, ctx));
                 dassert(pr.second, "the callback must not be registered before");
             }
-            
+
             struct epoll_event e;
             e.data.ptr = (void*)cb0;
             e.events = events;
-            
+
             if (epoll_ctl(_io_queue, EPOLL_CTL_ADD, fd, &e) < 0)
             {
                 derror("bind io handler to epoll_wait failed, err = %s, fd = %d", strerror(errno), fd);
@@ -105,11 +105,11 @@ namespace dsn
             else
                 return ERR_OK;
         }
-        
+
         error_code io_looper::unbind_io_handle(dsn_handle_t handle, io_loop_callback* cb)
         {
             int fd = (int)(intptr_t)handle;
-            
+
             if (epoll_ctl(_io_queue, EPOLL_CTL_DEL, fd, nullptr) < 0)
             {
                 derror("unbind io handler to epoll_wait failed, err = %s, fd = %d", strerror(errno), fd);
@@ -162,7 +162,7 @@ namespace dsn
                 if (read(_local_notification_fd, &notify_count, sizeof(notify_count)) != sizeof(notify_count))
                 {
                     // possibly consumed already by others
-                    // e.g., two contiguous write with two read, 
+                    // e.g., two contiguous write with two read,
                     // the second read will read nothing
                     return;
                 }
@@ -170,7 +170,7 @@ namespace dsn
                 this->handle_local_queues();
             };
 
-            bind_io_handle((dsn_handle_t)(intptr_t)_local_notification_fd, &_local_notification_callback, 
+            bind_io_handle((dsn_handle_t)(intptr_t)_local_notification_fd, &_local_notification_callback,
                 EPOLLIN | EPOLLET);
         }
 
@@ -186,7 +186,7 @@ namespace dsn
         void io_looper::start(service_node* node, int worker_count)
         {
             create_completion_queue();
-            
+
             for (int i = 0; i < worker_count; i++)
             {
                 std::thread* thr = new std::thread([this, node, i]()
@@ -197,8 +197,8 @@ namespace dsn
                     char buffer[128];
                     snprintf_p(buffer, sizeof(buffer), "%s.io-loop.%d", name, i);
                     task_worker::set_name(buffer);
-                    
-                    this->loop_worker(); 
+
+                    this->loop_worker();
                 });
                 _workers.push_back(thr);
             }
@@ -235,7 +235,7 @@ namespace dsn
                     if (errno == EINTR)
                     {
                         continue;
-                    }                        
+                    }
                     else
                     {
                         derror("epoll_wait loop exits, err = %s", strerror(errno));

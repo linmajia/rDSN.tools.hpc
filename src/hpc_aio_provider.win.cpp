@@ -2,8 +2,8 @@
  * The MIT License (MIT)
  *
  * Copyright (c) 2015 Microsoft Corporation
- * 
- * -=- Robust Distributed System Nucleus (rDSN) -=- 
+ *
+ * -=- Robust Distributed System Nucleus (rDSN) -=-
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -70,7 +70,7 @@ hpc_aio_provider::hpc_aio_provider(disk_engine* disk, aio_provider* inner_provid
         )
     {
         windows_disk_aio_context* ctx = CONTAINING_RECORD(lolp_or_events, windows_disk_aio_context, olp);
-        error_code err = native_error == ERROR_SUCCESS ? ERR_OK : 
+        error_code err = native_error == ERROR_SUCCESS ? ERR_OK :
             (native_error == ERROR_HANDLE_EOF ? ERR_HANDLE_EOF : ERR_FILE_OPERATION_FAILED);
         if (!ctx->evt)
         {
@@ -229,7 +229,7 @@ error_code hpc_aio_provider::close(dsn_handle_t fh)
     {
         derror("close file failed, err = 0x%x", ::GetLastError());
         return ERR_FILE_OPERATION_FAILED;
-    }        
+    }
 }
 
 error_code hpc_aio_provider::flush(dsn_handle_t fh)
@@ -296,7 +296,7 @@ error_code hpc_aio_provider::aio_internal(aio_task* aio_tsk, bool async, /*out*/
     if (!r)
     {
         int native_error = ::GetLastError();
-        
+
         if (native_error != ERROR_IO_PENDING)
         {
             derror("file operation failed, err = %u", native_error);

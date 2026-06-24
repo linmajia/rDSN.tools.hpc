@@ -2,8 +2,8 @@
  * The MIT License (MIT)
  *
  * Copyright (c) 2015 Microsoft Corporation
- * 
- * -=- Robust Distributed System Nucleus (rDSN) -=- 
+ *
+ * -=- Robust Distributed System Nucleus (rDSN) -=-
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,7 +26,7 @@
 
 /*
  * Description:
- *     define the base cross-platform asynchonous io looper interface 
+ *     define the base cross-platform asynchonous io looper interface
  *
  * Revision history:
  *     Aug., 2015, @imzhenyu (Zhenyu Guo), the first version
@@ -94,7 +94,7 @@ namespace dsn
         //   using evens to differentiate differnt types of ops
         //   for the same type of ops, it seems Linux doesn't support op differentiation
         //
-        // void handle_event(int native_error, uint32_t io_size, uintptr_t lolp_or_events) 
+        // void handle_event(int native_error, uint32_t io_size, uintptr_t lolp_or_events)
         typedef std::function<void(int, uint32_t, uintptr_t)> io_loop_callback;
 
         //
@@ -112,16 +112,16 @@ namespace dsn
             void close_completion_queue();
 
             error_code bind_io_handle(
-                dsn_handle_t handle, 
-                io_loop_callback* cb, 
+                dsn_handle_t handle,
+                io_loop_callback* cb,
                 unsigned int events = 0,
                 ref_counter* ctx = nullptr
                 );
-            
+
             error_code unbind_io_handle(dsn_handle_t handle, io_loop_callback* cb = nullptr);
 
             void notify_local_execution();
-            
+
             void exit_loops(bool wait);
 
             dsn_handle_t native_handle() { return (dsn_handle_t)(uintptr_t)(_io_queue); }

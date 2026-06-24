@@ -2,8 +2,8 @@
  * The MIT License (MIT)
  *
  * Copyright (c) 2015 Microsoft Corporation
- * 
- * -=- Robust Distributed System Nucleus (rDSN) -=- 
+ *
+ * -=- Robust Distributed System Nucleus (rDSN) -=-
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -46,14 +46,14 @@ namespace dsn
         public:
             io_looper_task_queue(task_worker_pool* pool, int index, task_queue* inner_provider);
             virtual ~io_looper_task_queue();
-                        
+
             virtual void  start(service_node* node, int worker_count) override;
             virtual void  stop() override;
             virtual void  handle_local_queues() override;
 
             virtual void  enqueue(task* task) override;
             virtual task* dequeue(/*inout*/int& batch_size)override;
-        
+
         protected:
             virtual bool is_shared_timer_queue() override
             {
@@ -93,7 +93,7 @@ namespace dsn
                 dassert(_looper != nullptr, "correspondent looper is empty");
             }
 
-            // after milliseconds, the provider should call task->enqueue()        
+            // after milliseconds, the provider should call task->enqueue()
             virtual void add_timer(task* task)
             {
                 _looper->add_timer(task);
@@ -104,7 +104,7 @@ namespace dsn
         };
 
         // ------------------ inline implementation --------------------
-        
+
 
     }
 }

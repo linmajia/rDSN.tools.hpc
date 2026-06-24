@@ -2,8 +2,8 @@
  * The MIT License (MIT)
  *
  * Copyright (c) 2015 Microsoft Corporation
- * 
- * -=- Robust Distributed System Nucleus (rDSN) -=- 
+ *
+ * -=- Robust Distributed System Nucleus (rDSN) -=-
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -46,14 +46,14 @@ namespace dsn
         public:
             hpc_env_provider(env_provider* inner_provider);
 
-            virtual uint64_t now_ns() const 
-            { 
+            virtual uint64_t now_ns() const
+            {
 # if defined(_WIN32)
                 uint64_t now;
                 ::QueryPerformanceCounter((LARGE_INTEGER*)&now);
                 return _ns_start + (uint64_t)((double)(now - _tick_start) / _tick_frequency_per_ns);
 # else
-                return utils::get_current_physical_time_ns(); 
+                return utils::get_current_physical_time_ns();
 # endif
             }
 
