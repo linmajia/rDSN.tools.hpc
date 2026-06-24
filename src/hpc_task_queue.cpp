@@ -2,8 +2,8 @@
  * The MIT License (MIT)
  *
  * Copyright (c) 2015 Microsoft Corporation
- * 
- * -=- Robust Distributed System Nucleus (rDSN) -=- 
+ *
+ * -=- Robust Distributed System Nucleus (rDSN) -=-
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -42,15 +42,15 @@
 # endif
 # define __TITLE__ "task.queue.hpc"
 
-namespace dsn 
+namespace dsn
 {
-    namespace tools 
+    namespace tools
     {
         hpc_task_queue::hpc_task_queue(task_worker_pool* pool, int index, task_queue* inner_provider)
             : task_queue(pool, index, inner_provider)
         {
         }
-        
+
         void hpc_task_queue::enqueue(task* task)
         {
             dassert(task->next == nullptr, "task is not alone");
@@ -64,7 +64,7 @@ namespace dsn
         task* hpc_task_queue::dequeue(/*inout*/int& batch_size)
         {
             task* t;
-            
+
             _lock.lock();
             _cond.wait(_lock, [=]{ return !_tasks.is_empty(); });
             t = _tasks.pop_batch(batch_size);
@@ -140,7 +140,7 @@ namespace dsn
                     {
                         head = in;
                     }
- 
+
                     last = in;
                     last->next = nullptr;
                 });

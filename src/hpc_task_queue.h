@@ -2,8 +2,8 @@
  * The MIT License (MIT)
  *
  * Copyright (c) 2015 Microsoft Corporation
- * 
- * -=- Robust Distributed System Nucleus (rDSN) -=- 
+ *
+ * -=- Robust Distributed System Nucleus (rDSN) -=-
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -40,7 +40,7 @@
 # include <concurrentqueue.h>
 # include <blockingconcurrentqueue.h>
 
-namespace dsn 
+namespace dsn
 {
     namespace tools
     {
@@ -52,7 +52,7 @@ namespace dsn
             void     enqueue(task* task) override;
             task*    dequeue(/*inout*/int& batch_size) override;
 
-        private:            
+        private:
             utils::ex_lock_nr_spin        _lock;
             std::condition_variable_any   _cond;
             slist<task>                   _tasks;

@@ -2,8 +2,8 @@
  * The MIT License (MIT)
  *
  * Copyright (c) 2015 Microsoft Corporation
- * 
- * -=- Robust Distributed System Nucleus (rDSN) -=- 
+ *
+ * -=- Robust Distributed System Nucleus (rDSN) -=-
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -56,7 +56,7 @@
 
 namespace dsn {
     namespace tools {
-        
+
 
         class hpc_network_provider : public connection_oriented_network
         {
@@ -66,12 +66,12 @@ namespace dsn {
             virtual error_code start(rpc_channel channel, int port, bool client_only, io_modifer& ctx);
             virtual ::dsn::rpc_address address() { return _address;  }
             virtual rpc_session_ptr create_client_session(::dsn::rpc_address server_addr);
-            
+
         private:
             socket_t      _listen_fd;
             ::dsn::rpc_address _address;
             io_looper     *_looper;
-            
+
         private:
             void do_accept();
 
@@ -84,7 +84,7 @@ namespace dsn {
                 io_loop_callback callback;
             };
 
-        private:            
+        private:
             ready_event      _accept_event;
 # ifdef _WIN32
             socket_t         _accept_sock;
@@ -97,7 +97,7 @@ namespace dsn {
         // client
         public:
             virtual void connect() override;
-            
+
         // server
         public:
 
@@ -128,7 +128,7 @@ namespace dsn {
             void bind_looper(io_looper* looper, bool delay = false);
             virtual void do_read(int read_next) override;
 
-        private:            
+        private:
             void do_write(uint64_t signature);
             void close();
             void on_failure(bool is_write = false);
@@ -139,7 +139,7 @@ namespace dsn {
                     on_failure(false);
                 }
             }
-            
+
         protected:
             socket_t                               _socket;
             uint64_t                               _sending_signature;
@@ -148,9 +148,9 @@ namespace dsn {
 # ifdef _WIN32
             hpc_network_provider::ready_event      _read_event;
             hpc_network_provider::ready_event      _write_event;
-            hpc_network_provider::ready_event      _connect_event;            
+            hpc_network_provider::ready_event      _connect_event;
 # else
-            io_loop_callback                       _ready_event;            
+            io_loop_callback                       _ready_event;
             struct sockaddr_in                     _peer_addr;
             io_looper*                             _looper;
 

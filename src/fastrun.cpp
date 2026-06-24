@@ -2,8 +2,8 @@
  * The MIT License (MIT)
  *
  * Copyright (c) 2015 Microsoft Corporation
- * 
- * -=- Robust Distributed System Nucleus (rDSN) -=- 
+ *
+ * -=- Robust Distributed System Nucleus (rDSN) -=-
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -36,9 +36,9 @@
 # include "fastrun.h"
 # include "mix_all_io_looper.h"
 
-namespace dsn 
+namespace dsn
 {
-    namespace tools 
+    namespace tools
     {
         void fastrun::install(service_spec& spec)
         {

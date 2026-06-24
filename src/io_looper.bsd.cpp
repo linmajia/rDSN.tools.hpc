@@ -2,8 +2,8 @@
  * The MIT License (MIT)
  *
  * Copyright (c) 2015 Microsoft Corporation
- * 
- * -=- Robust Distributed System Nucleus (rDSN) -=- 
+ *
+ * -=- Robust Distributed System Nucleus (rDSN) -=-
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -127,7 +127,7 @@ namespace dsn
                 auto pr = _io_sessions.insert(io_sessions::value_type(cb, ctx));
                 dassert(pr.second, "the callback must not be registered before");
             }
-            
+
             if (filter == EVFILT_READ_WRITE)
             {
                 e[0].filter = EVFILT_READ;
@@ -154,7 +154,7 @@ namespace dsn
 
             return ERR_OK;
         }
-        
+
         error_code io_looper::unbind_io_handle(dsn_handle_t handle, io_loop_callback* cb)
         {
             int fd = (int)(intptr_t)handle;
@@ -241,7 +241,7 @@ namespace dsn
                 this->handle_local_queues();
             };
 
-            bind_io_handle((dsn_handle_t)(intptr_t)_local_notification_fd, &_local_notification_callback, 
+            bind_io_handle((dsn_handle_t)(intptr_t)_local_notification_fd, &_local_notification_callback,
                 EVFILT_USER);
         }
 
@@ -258,7 +258,7 @@ namespace dsn
         void io_looper::start(service_node* node, int worker_count)
         {
             create_completion_queue();
-            
+
             for (int i = 0; i < worker_count; i++)
             {
                 std::thread* thr = new std::thread([this, node, i]()
@@ -269,8 +269,8 @@ namespace dsn
                     char buffer[128];
                     snprintf_p(buffer, sizeof(buffer), "%s.io-loop.%d", name, i);
                     task_worker::set_name(buffer);
-                    
-                    this->loop_worker(); 
+
+                    this->loop_worker();
                 });
                 _workers.push_back(thr);
             }
@@ -308,7 +308,7 @@ namespace dsn
                     if (errno == EINTR)
                     {
                         continue;
-                    }                        
+                    }
                     else
                     {
                         derror("kevent loop exits, err = %s", strerror(errno));

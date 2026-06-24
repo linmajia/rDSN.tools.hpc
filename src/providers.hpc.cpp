@@ -2,8 +2,8 @@
  * The MIT License (MIT)
  *
  * Copyright (c) 2015 Microsoft Corporation
- * 
- * -=- Robust Distributed System Nucleus (rDSN) -=- 
+ *
+ * -=- Robust Distributed System Nucleus (rDSN) -=-
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -55,10 +55,10 @@ namespace dsn {
             register_component_provider<hpc_tail_logger>("dsn::tools::hpc_tail_logger");
             register_component_provider<hpc_logger>("dsn::tools::hpc_logger");
             register_component_provider<hpc_task_queue>("dsn::tools::hpc_task_queue");
-            register_component_provider<hpc_task_priority_queue>("dsn::tools::hpc_task_priority_queue");            
+            register_component_provider<hpc_task_priority_queue>("dsn::tools::hpc_task_priority_queue");
             register_component_provider<hpc_concurrent_task_queue>("dsn::tools::hpc_concurrent_task_queue");
             register_component_provider<hpc_env_provider>("dsn::tools::hpc_env_provider");
-            
+
 # if defined(__APPLE__)
             register_component_provider<native_posix_aio_provider>("dsn::tools::hpc_aio_provider");
 # else

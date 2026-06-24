@@ -2,8 +2,8 @@
  * The MIT License (MIT)
  *
  * Copyright (c) 2015 Microsoft Corporation
- * 
- * -=- Robust Distributed System Nucleus (rDSN) -=- 
+ *
+ * -=- Robust Distributed System Nucleus (rDSN) -=-
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -85,7 +85,7 @@ namespace dsn
             {
                 dwarn("setsockopt TCP_NODELAY failed, err = %s", strerror(errno));
             }
-            
+
             int buflen = 8 * 1024 * 1024;
             if (setsockopt(s, SOL_SOCKET, SO_SNDBUF, (char*)&buflen, sizeof(buflen)) != 0)
             {
@@ -217,7 +217,7 @@ namespace dsn
                     if (errno != EAGAIN && errno != EWOULDBLOCK)
                     {
                         derror("accept failed, err = %s", strerror(errno));
-                    }                    
+                    }
                     break;
                 }
             }
@@ -233,7 +233,7 @@ namespace dsn
                     EVFILT_READ_WRITE,
                     this
                     );
-            }   
+            }
         }
 
         void hpc_rpc_session::do_read(int read_next)
@@ -324,7 +324,7 @@ namespace dsn
                 "make sure they are compatible");
 
             dbg_dassert(sig != 0, "cannot send empty msg");
-                        
+
             // new msg
             if (_sending_signature == 0)
             {
@@ -371,7 +371,7 @@ namespace dsn
                     if (err != EAGAIN && err != EWOULDBLOCK)
                     {
                         derror("(s = %d) sendmsg failed, err = %s", _socket, strerror(err));
-                        on_failure(true);                        
+                        on_failure(true);
                     }
                     else
                     {
@@ -465,7 +465,7 @@ namespace dsn
                 dinfo("(s = %d) kevent EVFILT_READ on %s, events = 0x%x",
                     _socket,
                     _remote_addr.to_string(),
-                    e.filter 
+                    e.filter
                     );
 
                 start_read_next();
@@ -523,7 +523,7 @@ namespace dsn
                 };
             }
         }
-        
+
         void hpc_rpc_session::on_connect_events_ready(uintptr_t lolp_or_events)
         {
             dassert(is_connecting(), "session must be connecting at this time");
@@ -555,7 +555,7 @@ namespace dsn
                     );
 
                 set_connected();
-                
+
                 if (_looper->bind_io_handle(
                     (dsn_handle_t)(intptr_t)_socket,
                     &_ready_event,
@@ -591,14 +591,14 @@ namespace dsn
                 _looper->unbind_io_handle((dsn_handle_t)(intptr_t)_socket, &_ready_event);
             }
             if (on_disconnected(is_write))
-                close();            
+                close();
         }
 
         void hpc_rpc_session::connect()
         {
             if (!try_connecting())
                 return;
-            
+
             dassert(_socket != -1, "invalid given socket handle");
 
             struct sockaddr_in addr;
@@ -629,7 +629,7 @@ namespace dsn
                 );
         }
 
-        
+
     }
 }
 

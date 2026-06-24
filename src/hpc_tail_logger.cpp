@@ -2,8 +2,8 @@
  * The MIT License (MIT)
  *
  * Copyright (c) 2015 Microsoft Corporation
- * 
- * -=- Robust Distributed System Nucleus (rDSN) -=- 
+ *
+ * -=- Robust Distributed System Nucleus (rDSN) -=-
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -44,14 +44,14 @@
 # include <fstream>
 # include <iostream>
 
-namespace dsn 
+namespace dsn
 {
-    namespace tools 
+    namespace tools
     {
         struct tail_log_hdr
         {
             uint32_t log_break; // '\0'
-            uint32_t magic;            
+            uint32_t magic;
             int32_t  length;
             uint64_t ts;
             tail_log_hdr* prev;
@@ -113,7 +113,7 @@ namespace dsn
                 return static_cast<int>(consumed);
             }
         }
-        
+
         hpc_tail_logger::hpc_tail_logger(const char* log_dir, logging_provider* inner)
             : logging_provider(log_dir, inner)
         {
@@ -134,8 +134,8 @@ namespace dsn
             register_it = true;
 
             // register command for tail logging
-            ::dsn::register_command("tail-log", 
-                "tail-log keyword back-seconds [back-start-seconds = 0] [tid1,tid2,...]", 
+            ::dsn::register_command("tail-log",
+                "tail-log keyword back-seconds [back-start-seconds = 0] [tid1,tid2,...]",
                 "tail-log find logs with given keyword and within [now - back-seconds, now - back-start-seconds]",
                 [this](const safe_vector<safe_string>& args)
                 {
@@ -240,7 +240,7 @@ namespace dsn
                 {
                     if (!tmp->is_valid())
                         break;
-                    
+
                     char* llog = (char*)(tmp)-tmp->length;
                     olog << llog << std::endl;
 
@@ -285,7 +285,7 @@ namespace dsn
                     continue;
 
                 tail_log_hdr *hdr = log->last_hdr, *tmp = log->last_hdr;
-                do 
+                do
                 {
                     if (!tmp->is_valid())
                         break;
@@ -293,13 +293,13 @@ namespace dsn
                     // filter by time
                     if (tmp->ts < start)
                         break;
-                    
+
                     if (tmp->ts > end)
                     {
                         tmp = tmp->prev;
                         continue;
                     }
-                        
+
                     // filter by keyword
                     char* llog = (char*)(tmp) - tmp->length;
                     if (strstr(llog, keyword))
@@ -310,7 +310,7 @@ namespace dsn
 
                     // try previous log
                     tmp = tmp->prev;
-                    
+
                 } while (tmp != nullptr && tmp != hdr);
             }
 
@@ -357,7 +357,7 @@ namespace dsn
             char* ptr0 = ptr; // remember it
             size_t capacity = static_cast<size_t>(s_tail_log_info.buffer + _per_thread_buffer_bytes - ptr);
 
-            // print verbose log header    
+            // print verbose log header
             uint64_t ts = 0;
             int tid = ::dsn::utils::get_current_tid();
             if (::dsn::tools::is_engine_ready())
@@ -419,7 +419,7 @@ namespace dsn
                 ptr += consumed;
                 capacity -= consumed;
             }
-            
+
             // set binary entry header on tail
             tail_log_hdr* hdr = (tail_log_hdr*)ptr;
             hdr->log_break = 0;

@@ -24,14 +24,14 @@ rDSN.tools.hpc is a collection of high performance local library providers for r
 
 ```
     [modules]
-    dsn.tools.hpc 
+    dsn.tools.hpc
 ```
 
-* use the providers in config file, e.g.,  
+* use the providers in config file, e.g.,
 
 ```
     [core]
-    logging_factory_name = dsn:tools::hpc_logger 
+    logging_factory_name = dsn:tools::hpc_logger
 
     [threadpool..default]
     queue_factory_name = dsn::tools::hpc_concurrent_task_queue
@@ -41,8 +41,8 @@ rDSN.tools.hpc is a collection of high performance local library providers for r
 
 ```
     [core]
-    tool = fastrun 
-```     
+    tool = fastrun
+```
 
 ##### License and Support
 
