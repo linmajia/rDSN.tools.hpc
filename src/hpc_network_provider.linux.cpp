@@ -229,6 +229,14 @@ namespace dsn
             {
                 char* ptr = _reader.read_buffer_ptr(read_next);
                 int remaining = _reader.read_buffer_capacity();
+                if (ptr == nullptr || remaining <= 0)
+                {
+                    derror("(s = %d) recv failed on %s, unable to prepare read buffer",
+                           _socket,
+                           _remote_addr.to_string());
+                    on_failure();
+                    break;
+                }
 
                 int length = recv(_socket, ptr, remaining, 0);
                 int err = errno;
