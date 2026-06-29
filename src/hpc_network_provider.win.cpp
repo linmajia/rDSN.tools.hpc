@@ -415,6 +415,15 @@ namespace dsn
 
             void* ptr = _reader.read_buffer_ptr(read_next);
             int remaining = _reader.read_buffer_capacity();
+            if (ptr == nullptr || remaining <= 0)
+            {
+                derror("(s = %d) recv failed on %s, unable to prepare read buffer",
+                       _socket,
+                       _remote_addr.to_string());
+                release_ref();
+                on_failure();
+                return;
+            }
             buf[0].buf = (char*)ptr;
             buf[0].len = remaining;
 
