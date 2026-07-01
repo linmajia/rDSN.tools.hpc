@@ -37,6 +37,8 @@
 # ifdef _WIN32
 
 # include "io_looper.h"
+# include <cstdint>
+# include <thread>
 
 # define NON_IO_TASK_NOTIFICATION_KEY 2
 

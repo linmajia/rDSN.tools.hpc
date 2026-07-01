@@ -41,6 +41,7 @@
 # include <sys/stat.h>
 # include <io.h>
 # include <stdio.h>
+# include <cstdint>
 # include "mix_all_io_looper.h"
 
 # ifdef __TITLE__

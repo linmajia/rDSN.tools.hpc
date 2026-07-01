@@ -42,6 +42,9 @@
 # include <sys/stat.h>
 # include <aio.h>
 # include <stdio.h>
+# include <cstring>
+# include <cstdint>
+# include <cerrno>
 # include "mix_all_io_looper.h"
 
 # ifdef __TITLE__
