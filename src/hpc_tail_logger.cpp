@@ -43,6 +43,7 @@
 # include <sstream>
 # include <fstream>
 # include <iostream>
+# include <cstring>
 
 namespace dsn
 {

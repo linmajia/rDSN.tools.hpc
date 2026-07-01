@@ -37,6 +37,9 @@
 # if defined(__APPLE__) || defined(__FreeBSD__)
 
 # include "io_looper.h"
+# include <cstring>
+# include <cstdint>
+# include <cerrno>
 
 # define IO_LOOPER_USER_NOTIFICATION_FD (-10)
 

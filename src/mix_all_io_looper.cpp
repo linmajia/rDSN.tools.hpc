@@ -34,6 +34,7 @@
  */
 
 # include "mix_all_io_looper.h"
+# include <cstdint>
 
 namespace dsn
 {

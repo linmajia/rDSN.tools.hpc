@@ -38,6 +38,9 @@
 
 # include "io_looper.h"
 # include <sys/eventfd.h>
+# include <cstring>
+# include <cstdint>
+# include <cerrno>
 
 namespace dsn
 {

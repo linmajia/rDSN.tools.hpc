@@ -40,6 +40,9 @@
 # include "mix_all_io_looper.h"
 # include <netinet/tcp.h>
 # include <fcntl.h>
+# include <cstring>
+# include <cstdint>
+# include <cerrno>
 
 # ifdef __TITLE__
 # undef __TITLE__

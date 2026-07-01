@@ -39,6 +39,9 @@
 # include "hpc_network_provider.h"
 # include "mix_all_io_looper.h"
 # include <netinet/tcp.h>
+# include <cstring>
+# include <cstdint>
+# include <cerrno>
 
 # ifdef __TITLE__
 # undef __TITLE__

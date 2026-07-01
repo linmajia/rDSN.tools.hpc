@@ -35,6 +35,7 @@
 
 
 # include "hpc_env_provider.h"
+# include <cstdint>
 
 # ifdef __TITLE__
 # undef __TITLE__
