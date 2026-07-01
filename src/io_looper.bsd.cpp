@@ -40,6 +40,7 @@
 # include <cstring>
 # include <cstdint>
 # include <cerrno>
+# include <thread>
 
 # define IO_LOOPER_USER_NOTIFICATION_FD (-10)
 

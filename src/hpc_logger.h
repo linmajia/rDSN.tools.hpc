@@ -41,6 +41,7 @@
 # include <mutex>
 # include <condition_variable>
 # include <atomic>
+# include <fstream>
 
 namespace dsn {
     namespace tools {

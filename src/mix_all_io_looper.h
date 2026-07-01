@@ -34,6 +34,7 @@
  */
 
 # include "io_looper.h"
+# include <atomic>
 
 namespace dsn
 {

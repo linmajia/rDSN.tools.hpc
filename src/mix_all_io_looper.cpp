@@ -35,6 +35,8 @@
 
 # include "mix_all_io_looper.h"
 # include <cstdint>
+# include <map>
+# include <unordered_map>
 
 namespace dsn
 {

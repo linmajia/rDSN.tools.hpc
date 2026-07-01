@@ -41,6 +41,7 @@
 # include <cstring>
 # include <cstdint>
 # include <cerrno>
+# include <thread>
 
 namespace dsn
 {

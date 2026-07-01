@@ -39,6 +39,7 @@
 #include <queue>
 #include <iostream>
 #include <cstring>
+#include <chrono>
 #include <dsn/tool_api.h>
 #include <gtest/gtest.h>
 #include <dsn/service_api_cpp.h>
